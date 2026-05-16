@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎭 МАФИЯ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --night:#08080f;--night2:#0f0f1c;--night3:#16162a;
+  --card:#1b1b30;--card2:#222238;--card3:#2a2a45;
+  --red:#e8394a;--red2:#ff6b7a;--red3:#ffa0aa;
+  --gold:#f5a623;--gold2:#ffc055;
+  --teal:#2dd4bf;--teal2:#5eead4;
+  --purple:#a78bfa;--purple2:#c4b5fd;
+  --blue:#60a5fa;--blue2:#93c5fd;
+  --text:#eeeaff;--muted:#7a7899;--muted2:#5a587a;
+  --border:#252545;--border2:#303060;
+  --success:#22c55e;--warn:#f59e0b;
+}
+body{background:var(--night);color:var(--text);font-family:'Onest',sans-serif;min-height:100vh;overflow-x:hidden}
+h1,h2,h3,.brand,.role-name,.phase-title,.win-title{font-family:'Unbounded',sans-serif}
+
+/* STARS */
+.bg-stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 3s infinite}
+@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.7}}
+
+/* SCANLINE OVERLAY */
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px)}
+
+.app{position:relative;z-index:2;min-height:100vh}
+
+/* NAV */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.9rem 1.5rem;border-bottom:1px solid var(--border);
+  background:rgba(8,8,15,.9);backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:100
+}
+.brand{font-size:1rem;color:var(--red2);letter-spacing:.06em;line-height:1.2}
+.brand span{color:var(--muted);font-size:.7rem;display:block;font-family:'Onest',sans-serif;font-weight:300;letter-spacing:.12em;margin-top:2px}
+.nav-right{display:flex;align-items:center;gap:.6rem}
+.room-pill{background:var(--card);border:1px solid var(--border2);border-radius:999px;padding:.25rem .8rem;font-size:.78rem;color:var(--gold);font-family:'Unbounded',sans-serif;letter-spacing:.08em;cursor:pointer;transition:.15s}
+.room-pill:hover{background:var(--card2)}
+.connection-dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 6px var(--success);flex-shrink:0;transition:.3s}
+.connection-dot.offline{background:var(--red);box-shadow:0 0 6px var(--red)}
+
+/* SCREEN */
+.screen{display:none;padding:1.5rem;max-width:660px;margin:0 auto;animation:fadeIn .25s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.25rem;margin-bottom:.9rem;transition:border-color .2s}
+.card-title{font-family:'Unbounded',sans-serif;font-size:.75rem;color:var(--muted);margin-bottom:.9rem;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:.5rem}
+.card-title-right{margin-left:auto;font-family:'Onest',sans-serif;font-size:.75rem;text-transform:none;letter-spacing:0}
+
+/* INPUTS */
+.input-row{display:flex;gap:.5rem;margin-bottom:.9rem}
+input[type=text]{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:.65rem 1rem;color:var(--text);font-family:'Onest',sans-serif;font-size:.95rem;width:100%;outline:none;transition:border-color .2s,box-shadow .2s}
+input[type=text]:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(167,139,250,.12)}
+input[type=text]::placeholder{color:var(--muted2)}
+
+/* BUTTONS */
+.btn{border:none;border-radius:10px;padding:.65rem 1.2rem;font-family:'Onest',sans-serif;font-size:.9rem;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;position:relative;overflow:hidden}
+.btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:.15s}
+.btn:hover::after{background:rgba(255,255,255,.06)}
+.btn-primary{background:var(--red);color:#fff;box-shadow:0 4px 16px rgba(232,57,74,.3)}
+.btn-primary:hover{background:var(--red2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(232,57,74,.4)}
+.btn-ghost{background:var(--card2);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--purple);color:var(--purple)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a0a00;font-weight:600;box-shadow:0 4px 16px rgba(245,166,35,.25)}
+.btn-gold:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,166,35,.35)}
+.btn-danger{background:rgba(232,57,74,.15);color:var(--red2);border:1px solid rgba(232,57,74,.3)}
+.btn-danger:hover{background:rgba(232,57,74,.25);border-color:var(--red)}
+.btn-sm{padding:.35rem .85rem;font-size:.8rem;border-radius:8px}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+.btn-full{width:100%}
+
+/* HERO */
+.hero{text-align:center;padding:2.5rem 1rem 1.5rem}
+.hero h1{font-size:2.2rem;line-height:1.1;margin-bottom:.7rem}
+.hero h1 span{color:var(--red2)}
+.hero p{color:var(--muted);font-size:.95rem;margin-bottom:1.75rem;line-height:1.7;max-width:400px;margin-left:auto;margin-right:auto}
+.hero-btns{display:flex;gap:.65rem;justify-content:center;flex-wrap:wrap}
+.restore-banner{background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(96,165,250,.08));border:1px solid rgba(167,139,250,.3);border-radius:12px;padding:.9rem 1.1rem;margin-bottom:.9rem;display:flex;align-items:center;gap:.75rem;animation:fadeIn .3s ease}
+.restore-banner-text{flex:1;font-size:.85rem}
+.restore-banner-text strong{color:var(--purple2);display:block;margin-bottom:.15rem}
+.restore-banner-text span{color:var(--muted);font-size:.8rem}
+
+/* PLAYERS LIST */
+.players-list{display:flex;flex-direction:column;gap:.4rem}
+.player-row{display:flex;align-items:center;gap:.65rem;padding:.55rem .85rem;background:var(--card2);border-radius:10px;border:1px solid var(--border);transition:all .2s}
+.player-row:hover{border-color:var(--border2)}
+.player-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Unbounded',sans-serif;font-size:.7rem;font-weight:600;flex-shrink:0;border:2px solid transparent}
+.player-name{flex:1;font-size:.88rem}
+.player-badges{display:flex;gap:.3rem;flex-wrap:wrap}
+.player-badge{font-size:.68rem;padding:.18rem .5rem;border-radius:999px;font-weight:500;letter-spacing:.03em}
+.badge-host{background:#2a1a3e;color:var(--purple);border:1px solid var(--purple)}
+.badge-ready{background:#0a2e22;color:var(--teal);border:1px solid var(--teal)}
+.badge-dead{background:#2a0a0f;color:var(--red);border:1px solid var(--red)}
+.badge-you{background:#1a1a35;color:var(--blue2);border:1px solid var(--blue)}
+
+/* ROLE CARD */
+.role-card{text-align:center;padding:2rem 1.5rem;border-radius:20px;margin-bottom:1.25rem;position:relative;overflow:hidden}
+.role-card::before{content:'';position:absolute;inset:-50%;background:radial-gradient(circle,rgba(255,255,255,.04) 0%,transparent 70%)}
+.role-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent)}
+.role-icon{font-size:3.5rem;margin-bottom:.5rem;display:block}
+.role-name{font-size:1.3rem;margin-bottom:.45rem}
+.role-desc{color:rgba(255,255,255,.65);font-size:.88rem;line-height:1.6}
+.role-team{font-size:.75rem;margin-top:.6rem;opacity:.7;letter-spacing:.08em}
+.role-mafia{background:linear-gradient(135deg,#2a0814,#1a0a14);border:2px solid var(--red);box-shadow:0 0 30px rgba(232,57,74,.15)}
+.role-detective{background:linear-gradient(135deg,#0a1a2a,#0a1428);border:2px solid var(--blue);box-shadow:0 0 30px rgba(96,165,250,.15)}
+.role-doctor{background:linear-gradient(135deg,#0a2a1a,#0a1a14);border:2px solid var(--teal);box-shadow:0 0 30px rgba(45,212,191,.15)}
+.role-innocent{background:linear-gradient(135deg,#1a1a2a,#12121e);border:2px solid var(--border)}
+
+/* PHASE BANNER */
+.phase-banner{padding:1.1rem 1.25rem;border-radius:14px;margin-bottom:1rem;position:relative;overflow:hidden}
+.phase-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent)}
+.phase-night{background:#0d0d22;border:1px solid #3344cc}
+.phase-day{background:#1f1500;border:1px solid var(--gold)}
+.phase-vote{background:#1f0a0a;border:1px solid var(--red)}
+.phase-header{display:flex;align-items:center;gap:.75rem}
+.phase-title{font-size:1rem;flex:1}
+.phase-round{font-family:'Onest',sans-serif;font-size:.75rem;color:var(--muted);background:rgba(0,0,0,.25);padding:.2rem .6rem;border-radius:999px}
+.phase-sub{font-size:.82rem;color:var(--muted);margin-top:.3rem}
+.timer-bar{height:3px;background:var(--card2);border-radius:2px;overflow:hidden;margin-top:.75rem}
+.timer-fill{height:100%;background:var(--teal);border-radius:2px;transition:width 1s linear,background .5s}
+
+/* TARGET LIST */
+.target-list{display:flex;flex-direction:column;gap:.35rem}
+.target-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .85rem;background:var(--card2);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s}
+.target-item:hover{border-color:rgba(232,57,74,.5);background:rgba(232,57,74,.06)}
+.target-item.selected{border-color:var(--red);background:rgba(232,57,74,.1)}
+.target-item.selected .target-name{color:var(--red2)}
+.target-num{font-family:'Unbounded',sans-serif;font-size:.7rem;color:var(--muted);width:18px;text-align:center}
+.target-name{flex:1;font-size:.88rem}
+.target-check{color:var(--red2);font-size:.9rem}
+.action-confirm{margin-top:.9rem;display:flex;gap:.6rem}
+.action-confirm .btn{flex:1}
+
+/* GAME LOG */
+.log{display:flex;flex-direction:column;gap:.3rem;max-height:180px;overflow-y:auto;padding-right:.2rem}
+.log::-webkit-scrollbar{width:3px}
+.log::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.log-entry{font-size:.82rem;color:var(--muted);padding:.3rem .6rem;border-left:2px solid var(--border);animation:fadeIn .2s ease}
+.log-entry.important{color:var(--text);border-left-color:var(--gold)}
+.log-entry.danger{color:var(--red2);border-left-color:var(--red)}
+.log-entry.success{color:var(--teal);border-left-color:var(--teal)}
+
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;height:240px}
+.chat-messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.3rem;padding:.1rem .1rem .5rem;margin-bottom:.6rem}
+.chat-messages::-webkit-scrollbar{width:3px}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.chat-msg{display:flex;gap:.5rem;align-items:flex-start;animation:fadeIn .2s ease}
+.chat-msg.mine{flex-direction:row-reverse}
+.chat-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Unbounded',sans-serif;font-size:.6rem;font-weight:600;flex-shrink:0}
+.chat-bubble{max-width:75%;padding:.4rem .65rem;border-radius:10px;font-size:.82rem;line-height:1.4}
+.chat-bubble .chat-sender{font-size:.7rem;font-weight:600;margin-bottom:.15rem;opacity:.8}
+.chat-msg:not(.mine) .chat-bubble{background:var(--card2);border:1px solid var(--border);border-radius:4px 10px 10px 10px}
+.chat-msg.mine .chat-bubble{background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.3);border-radius:10px 4px 10px 10px}
+.chat-msg.system .chat-bubble{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);color:var(--gold2);font-size:.78rem;font-style:italic;border-radius:10px;text-align:center}
+.chat-input-row{display:flex;gap:.4rem}
+.chat-input-row input{font-size:.85rem;padding:.5rem .85rem}
+.chat-input-row .btn{padding:.5rem .9rem;font-size:.82rem}
+
+/* DETECT RESULT */
+.detect-result{display:flex;align-items:center;gap:.9rem;padding:.9rem 1rem;background:var(--card2);border:1px solid var(--border2);border-radius:12px;margin-top:.75rem}
+.detect-result-icon{font-size:2rem;flex-shrink:0}
+.detect-result-text{font-size:.82rem;color:var(--muted)}
+.detect-result-verdict{font-size:.95rem;font-weight:600;margin-bottom:.15rem}
+
+/* STATUS PILLS */
+.status-pills{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem}
+.pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.73rem;padding:.18rem .6rem;border-radius:999px;font-weight:500}
+.pill-red{background:#2a0814;color:var(--red2);border:1px solid rgba(232,57,74,.4)}
+.pill-teal{background:#0a2a22;color:var(--teal);border:1px solid rgba(45,212,191,.4)}
+.pill-muted{background:var(--card2);color:var(--muted);border:1px solid var(--border)}
+.pill-gold{background:rgba(245,166,35,.1);color:var(--gold2);border:1px solid rgba(245,166,35,.3)}
+
+/* WIN SCREEN */
+.win-screen{text-align:center;padding:2.5rem 1rem}
+.win-icon{font-size:5rem;margin-bottom:.9rem;display:block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.win-title{font-size:1.8rem;margin-bottom:.4rem}
+.win-sub{color:var(--muted);font-size:.95rem;margin-bottom:1.75rem}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(0);background:var(--card2);border:1px solid var(--border2);border-radius:12px;padding:.6rem 1.2rem;font-size:.88rem;z-index:9999;transition:opacity .3s,transform .3s;white-space:nowrap;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.toast.hidden{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(8px)}
+
+/* MODAL OVERLAY */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .2s ease}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:1.75rem;max-width:340px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.modal h3{font-family:'Unbounded',sans-serif;font-size:1rem;margin-bottom:.5rem}
+.modal p{color:var(--muted);font-size:.88rem;margin-bottom:1.25rem;line-height:1.6}
+.modal-btns{display:flex;gap:.6rem;justify-content:center}
+
+/* NIGHT ACTION DONE */
+.action-done{text-align:center;padding:.9rem;color:var(--teal);font-size:.88rem;display:flex;align-items:center;justify-content:center;gap:.4rem}
+
+/* VOTED NOTICE */
+.voted-notice{text-align:center;padding:.9rem;color:var(--muted);font-size:.85rem}
+
+/* SPECTATOR BADGE */
+.spectator-msg{text-align:center;padding:.75rem 1rem;background:rgba(90,88,122,.1);border:1px solid rgba(90,88,122,.3);border-radius:10px;font-size:.83rem;color:var(--muted);margin-bottom:.5rem}
+
+/* TAB BAR */
+.tab-bar{display:flex;gap:.3rem;margin-bottom:.9rem;background:var(--card2);border-radius:12px;padding:.3rem}
+.tab{flex:1;padding:.5rem;font-size:.82rem;border-radius:9px;text-align:center;cursor:pointer;transition:.15s;border:none;background:transparent;color:var(--muted);font-family:'Onest',sans-serif;font-weight:500}
+.tab.active{background:var(--card3);color:var(--text)}
+.tab-badge{display:inline-block;background:var(--red);color:#fff;border-radius:999px;font-size:.65rem;padding:.05rem .35rem;margin-left:.3rem;vertical-align:middle}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);margin:.9rem 0}
+
+/* MAFIA TEAM REVEAL */
+.mafia-team-box{background:rgba(232,57,74,.06);border:1px solid rgba(232,57,74,.25);border-radius:12px;padding:.85rem 1rem;margin-top:.75rem}
+.mafia-team-title{font-size:.75rem;color:var(--red2);font-family:'Unbounded',sans-serif;letter-spacing:.08em;margin-bottom:.5rem}
+</style>
+</head>
+<body>
+
+<div class="bg-stars" id="stars"></div>
+<div class="scanlines"></div>
+
+<div class="app">
+  <nav>
+    <div class="brand">🎭 МАФИЯ<span>Multiplayer</span></div>
+    <div class="nav-right">
+      <div class="connection-dot" id="connDot"></div>
+      <div class="room-pill" id="roomPill" style="display:none" onclick="copyCode()">—</div>
+    </div>
+  </nav>
+
+  <!-- HOME -->
+  <div class="screen active" id="screenHome">
+    <div id="restoreBanner" style="display:none" class="restore-banner">
+      <div style="font-size:1.5rem">🔄</div>
+      <div class="restore-banner-text">
+        <strong>Алдыңғы сессия табылды</strong>
+        <span id="restoreInfo">Бөлмеге оралу мүмкін</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="restoreSession()">Оралу</button>
+      <button class="btn btn-sm" style="background:transparent;color:var(--muted);border:none" onclick="clearSession()">✕</button>
+    </div>
+    <div class="hero">
+      <h1>Мафия <span>ойыны</span></h1>
+      <p>Достарыңызбен бірге ойнаңыз. Бөлме жасаңыз немесе кодпен кіріңіз.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">👤 Атыңыз</div>
+      <input type="text" id="nameInput" placeholder="Атыңызды жазыңыз..." maxlength="20">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.9rem">
+      <div class="card" style="margin-bottom:0">
+        <div class="card-title">✨ Жаңа бөлме</div>
+        <div style="display:flex;gap:.5rem;margin-bottom:.65rem;background:var(--card2);border-radius:8px;padding:.25rem">
+          <button class="btn btn-sm" id="typePrivate" style="flex:1;background:var(--card3);color:var(--text);border:1px solid var(--border2)" onclick="setRoomType('private')">🔒 Жабық</button>
+          <button class="btn btn-sm" id="typePublic" style="flex:1;background:transparent;color:var(--muted);border:none" onclick="setRoomType('public')">🌐 Ашық</button>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="createRoom()">+ Жасау</button>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="card-title">🔑 Кодпен кіру</div>
+        <div class="input-row" style="margin-bottom:.6rem">
+          <input type="text" id="roomInput" placeholder="Код" maxlength="6" style="text-transform:uppercase">
+        </div>
+        <button class="btn btn-ghost btn-full" onclick="joinRoom()">Кіру →</button>
+      </div>
+    </div>
+    <div class="card" id="publicRoomsCard">
+      <div class="card-title">🌐 Ашық бөлмелер <span class="card-title-right"><button class="btn btn-ghost btn-sm" onclick="loadPublicRooms()">🔄</button></span></div>
+      <div id="publicRoomsList"><div style="color:var(--muted);font-size:.83rem;text-align:center;padding:.5rem">Жүктелуде...</div></div>
+    </div>
+  </div>
+
+  <!-- LOBBY -->
+  <div class="screen" id="screenLobby">
+    <div class="card" style="text-align:center;padding:1.25rem 1rem">
+      <div style="font-size:.75rem;color:var(--muted);font-family:'Unbounded',sans-serif;letter-spacing:.1em;margin-bottom:.4rem">БӨЛМЕ КОДЫ</div>
+      <div style="font-family:'Unbounded',sans-serif;font-size:2.8rem;letter-spacing:.35em;color:var(--gold);line-height:1" id="roomCode">—</div>
+      <div style="margin-top:.75rem;display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="copyCode()">📋 Копировать</button>
+        <span id="roomVisibilityBadge" class="pill pill-muted" style="font-size:.72rem">🔒 Жабық</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">👥 Ойыншылар <span class="card-title-right" id="playerCount" style="color:var(--muted)">0/∞</span></div>
+      <div id="lobbyList" class="players-list"></div>
+    </div>
+    <!-- CHAT in lobby -->
+    <div class="card">
+      <div class="card-title">💬 Чат</div>
+      <div class="chat-wrap">
+        <div class="chat-messages" id="lobbyChatMessages"></div>
+        <div class="chat-input-row">
+          <input type="text" id="lobbyChatInput" placeholder="Хабар жазыңыз..." maxlength="120" onkeydown="if(event.key==='Enter')sendChat('lobby')">
+          <button class="btn btn-ghost" onclick="sendChat('lobby')">➤</button>
+        </div>
+      </div>
+    </div>
+    <div id="hostControls" style="display:none">
+      <button class="btn btn-gold btn-full" style="font-size:1rem;padding:.9rem" id="startBtn" onclick="startGame()">🎮 Ойынды бастау</button>
+      <p style="color:var(--muted);font-size:.78rem;text-align:center;margin-top:.4rem">Ең аз 4 ойыншы керек</p>
+    </div>
+    <div id="guestWaiting" style="text-align:center;color:var(--muted);font-size:.88rem;padding:.75rem">⏳ Хост ойынды бастайды...</div>
+  </div>
+
+  <!-- ROLE REVEAL -->
+  <div class="screen" id="screenRole">
+    <p style="text-align:center;color:var(--muted);margin-bottom:1.25rem;font-size:.88rem">Сіздің рөліңіз:</p>
+    <div class="role-card" id="myRoleCard">
+      <span class="role-icon" id="myRoleIcon">❓</span>
+      <div class="role-name" id="myRoleName">...</div>
+      <div class="role-desc" id="myRoleDesc">...</div>
+      <div class="role-team" id="myRoleTeam"></div>
+    </div>
+    <div id="mafiaTeamReveal" style="display:none" class="mafia-team-box">
+      <div class="mafia-team-title">🔴 МАФИЯ КОМАНДАСЫ</div>
+      <div id="mafiaTeamList" class="players-list"></div>
+    </div>
+    <button class="btn btn-primary btn-full" style="padding:.9rem;font-size:1rem;margin-top:.75rem" onclick="readyUp()" id="readyBtn">✅ Дайынмын</button>
+  </div>
+
+  <!-- GAME -->
+  <div class="screen" id="screenGame">
+    <div class="phase-banner phase-night" id="phaseBanner">
+      <div class="phase-header">
+        <div class="phase-title" id="phaseTitle">🌙 Түн</div>
+        <span class="phase-round" id="phaseRound">1-раунд</span>
+      </div>
+      <div class="phase-sub" id="phaseSub">Мафия оянды...</div>
+      <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+    </div>
+
+    <div class="status-pills" id="statusPills"></div>
+
+    <div class="tab-bar">
+      <button class="tab active" id="tabGame" onclick="switchTab('game')">🎮 Ойын</button>
+      <button class="tab" id="tabChat" onclick="switchTab('chat')">💬 Чат <span class="tab-badge" id="chatBadge" style="display:none">!</span></button>
+      <button class="tab" id="tabLog" onclick="switchTab('log')">📋 Журнал</button>
+    </div>
+
+    <!-- TAB: GAME -->
+    <div id="tabGameContent">
+      <div class="card" id="actionCard" style="display:none">
+        <div class="card-title" id="actionTitle">Іс-қимыл</div>
+        <div id="actionBody"></div>
+      </div>
+      <div class="card" id="detectResultCard" style="display:none">
+        <div class="card-title">🔍 Тексеру нәтижесі</div>
+        <div class="detect-result" id="detectResultInner">
+          <div class="detect-result-icon" id="detectIcon">❓</div>
+          <div>
+            <div class="detect-result-verdict" id="detectVerdict">...</div>
+            <div class="detect-result-text" id="detectText">...</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🟢 Тірі ойыншылар</div>
+        <div id="aliveList" class="players-list"></div>
+      </div>
+    </div>
+
+    <!-- TAB: CHAT -->
+    <div id="tabChatContent" style="display:none">
+      <div class="card">
+        <div class="card-title">💬 Ойыншылар чаты</div>
+        <div class="chat-wrap" style="height:300px">
+          <div class="chat-messages" id="gameChatMessages"></div>
+          <div class="chat-input-row">
+            <input type="text" id="gameChatInput" placeholder="Хабар жазыңыз..." maxlength="120" onkeydown="if(event.key==='Enter')sendChat('game')">
+            <button class="btn btn-ghost" onclick="sendChat('game')">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: LOG -->
+    <div id="tabLogContent" style="display:none">
+      <div class="card">
+        <div class="card-title">📋 Ойын журналы</div>
+        <div class="log" id="gameLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIN -->
+  <div class="screen" id="screenWin">
+    <div class="win-screen">
+      <span class="win-icon" id="winIcon">🏆</span>
+      <div class="win-title" id="winTitle">Жеңді!</div>
+      <div class="win-sub" id="winSub">...</div>
+      <div id="rolesRevealCard" class="card" style="text-align:left;margin-bottom:1rem"></div>
+      <button class="btn btn-gold" style="padding:.9rem 2.5rem;font-size:1rem" onclick="backToHome()">🔄 Қайта ойнау</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEAVE MODAL -->
+<div class="modal-overlay hidden" id="leaveModal">
+  <div class="modal">
+    <h3>🚪 Бөлмеден шығу?</h3>
+    <p>Ойыннан шығасыз ба? Сіздің орыныңыз жойылады.</p>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeLeaveModal()">Қалу</button>
+      <button class="btn btn-danger" onclick="confirmLeave()">Шығу</button>
+    </div>
+  </div>
+</div>
+
+<!-- KICK MODAL -->
+<div class="modal-overlay hidden" id="kickModal">
+  <div class="modal">
+    <h3>👢 Ойыншыны шығару?</h3>
+    <p id="kickModalText">Шынымен шығарасыз ба?</p>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeKickModal()">Болдырмау</button>
+      <button class="btn btn-danger" onclick="confirmKick()">Шығару</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script>
+
+// ── Config ──
+const BACKEND_URL = 'http://localhost:8000'; // ← change to your server URL
+
+// ── Stars ──
+const starsEl = document.getElementById('stars');
+for(let i=0;i<90;i++){
+  const s=document.createElement('div');s.className='star';
+  const sz=Math.random()*2+.8;
+  s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${2+Math.random()*4}s`;
+  starsEl.appendChild(s);
+}
+
+// ── State ──
+let myId=null, myName='', roomId=null, isHost=false, myRole=null;
+let roomType='private';
+let selectedTarget=null, actionDone=false, timerInterval=null;
+let lastPhase=null, detectiveResult=null;
+let unreadChat=0, activeTab='game';
+let sseSource=null;
+let kickTargetId=null;
+
+const SESSION_KEY='mafia_session_v3';
+const ROOM_TTL=2*60*60*1000;
+
+// ── Utils ──
+const uid=()=>Math.random().toString(36).slice(2,9);
+const COLORS=['#e8394a','#a78bfa','#2dd4bf','#f5a623','#60a5fa','#f472b6','#34d399','#fb923c'];
+const avatarColor=id=>COLORS[(id||'x').charCodeAt(0)%COLORS.length];
+const initials=n=>(n||'?').slice(0,2).toUpperCase();
+const genCode=()=>Math.random().toString(36).slice(2,7).toUpperCase();
+const esc=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML;};
+const getRoleLabel=r=>({mafia:'🔴 Мафия',detective:'🔍 Детектив',doctor:'💊 Дәрігер',innocent:'⚪ Бейкүнәп'}[r]||'❓');
+const getRoleName=r=>({mafia:'Мафия',detective:'Детектив',doctor:'Дәрігер',innocent:'Бейкүнәп'}[r]||r);
+
+const showScreen=id=>{
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+};
+let toastTimer;
+const showToast=(msg,dur=2500)=>{
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.add('hidden'),dur);
+};
+
+// ── API ──
+async function api(path, body=null){
+  const opts = body
+    ? {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)}
+    : {method:'GET'};
+  const res = await fetch(BACKEND_URL+path, opts);
+  const data = await res.json().catch(()=>({detail:'Server error'}));
+  if(!res.ok) throw new Error(data.detail||'API error');
+  return data;
+}
+
+// ── Connection dot via SSE ──
+function setConnected(ok){
+  document.getElementById('connDot').classList.toggle('offline', !ok);
+}
+
+// ── SSE real-time listener ──
+function listenRoom(){
+  if(sseSource){ sseSource.close(); sseSource=null; }
+  sseSource = new EventSource(`${BACKEND_URL}/api/room/${roomId}/stream`);
+  sseSource.onopen = ()=>setConnected(true);
+  sseSource.onerror = ()=>setConnected(false);
+  sseSource.addEventListener('state', e=>{
+    try{ handleStateUpdate(JSON.parse(e.data)); }catch(err){ console.error(err); }
+  });
+  sseSource.addEventListener('chat', e=>{
+    try{
+      const msgs = JSON.parse(e.data);
+      renderChat(msgs,'lobbyChatMessages');
+      renderChat(msgs,'gameChatMessages');
+      const newCount=msgs.length;
+      if(newCount>window._lastChatCount && activeTab!=='chat' && document.getElementById('screenGame').classList.contains('active')){
+        document.getElementById('chatBadge').style.display='inline';
+      }
+      window._lastChatCount=newCount;
+    }catch(err){ console.error(err); }
+  });
+}
+
+// ── Session ──
+function saveSession(){
+  if(!myId||!roomId)return;
+  localStorage.setItem(SESSION_KEY,JSON.stringify({myId,myName,roomId,isHost,ts:Date.now()}));
+}
+function loadSession(){return JSON.parse(localStorage.getItem(SESSION_KEY)||'null');}
+function clearSession(){
+  localStorage.removeItem(SESSION_KEY);
+  document.getElementById('restoreBanner').style.display='none';
+}
+async function restoreSession(){
+  const s=loadSession(); if(!s)return;
+  try{
+    const data = await api(`/api/room/${s.roomId}`);
+    if(!data||!data.players?.[s.myId]){clearSession();return showToast('❌ Бөлме жоқ немесе шығарылдыңыз');}
+    myId=s.myId; myName=s.myName; roomId=s.roomId; isHost=data.host===myId;
+    document.getElementById('nameInput').value=myName;
+    setRoomPill(roomId);
+    listenRoom();
+    showToast('✅ Сессия қалпына келтірілді');
+  }catch(e){ clearSession(); showToast('❌ Сессия қалпына келмеді'); }
+}
+function checkSession(){
+  const s=loadSession(); if(!s)return;
+  if(Date.now()-s.ts>ROOM_TTL){clearSession();return;}
+  document.getElementById('restoreBanner').style.display='flex';
+  document.getElementById('restoreInfo').textContent=`${s.myName} · Бөлме: ${s.roomId}`;
+}
+checkSession();
+loadPublicRooms();
+
+// ── Room type toggle ──
+function setRoomType(type){
+  roomType=type;
+  const priv=document.getElementById('typePrivate');
+  const pub=document.getElementById('typePublic');
+  if(!priv||!pub)return;
+  if(type==='private'){
+    priv.style.cssText='flex:1;background:var(--card3);color:var(--text);border:1px solid var(--border2)';
+    pub.style.cssText='flex:1;background:transparent;color:var(--muted);border:none';
+  }else{
+    pub.style.cssText='flex:1;background:var(--card3);color:var(--text);border:1px solid var(--border2)';
+    priv.style.cssText='flex:1;background:transparent;color:var(--muted);border:none';
+  }
+}
+
+// ── Public rooms ──
+async function loadPublicRooms(){
+  const el=document.getElementById('publicRoomsList');
+  if(!el)return;
+  el.innerHTML='<div style="color:var(--muted);font-size:.83rem;text-align:center;padding:.5rem">🔄 Жүктелуде...</div>';
+  try{
+    const rooms = await api('/api/rooms/public');
+    if(!rooms.length){
+      el.innerHTML='<div style="color:var(--muted);font-size:.83rem;text-align:center;padding:.5rem">Ашық бөлме жоқ</div>';
+      return;
+    }
+    el.innerHTML=rooms.map(r=>`
+      <div style="display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;background:var(--card2);border:1px solid var(--border);border-radius:10px;margin-bottom:.35rem">
+        <div style="flex:1">
+          <div style="font-size:.85rem;font-weight:500">${esc(r.hostName||r.id)}'s бөлме</div>
+          <div style="font-size:.75rem;color:var(--muted)">${r.playerCount} ойыншы · ${r.id}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="quickJoin('${r.id}')">Кіру →</button>
+      </div>`).join('');
+  }catch(e){
+    el.innerHTML='<div style="color:var(--red2);font-size:.83rem;text-align:center;padding:.5rem">Жүктеу қатесі</div>';
+  }
+}
+async function quickJoin(code){
+  const name=document.getElementById('nameInput').value.trim();
+  if(!name)return showToast('⚠️ Алдымен атыңызды жазыңыз');
+  document.getElementById('roomInput').value=code;
+  joinRoom();
+}
+
+// ── Leave guard ──
+window.addEventListener('beforeunload',e=>{
+  if(roomId&&myId){e.preventDefault();e.returnValue='';return '';}
+});
+function showLeaveModal(){document.getElementById('leaveModal').classList.remove('hidden');}
+function closeLeaveModal(){document.getElementById('leaveModal').classList.add('hidden');}
+async function confirmLeave(){
+  closeLeaveModal();
+  if(sseSource){sseSource.close();sseSource=null;}
+  try{ await api('/api/leave',{roomId,playerId:myId}); }catch(e){}
+  clearSession();
+  location.reload();
+}
+
+// ── Room pill ──
+function setRoomPill(code){
+  const p=document.getElementById('roomPill');
+  if(code){p.style.display='block';p.textContent=code;}
+  else{p.style.display='none';}
+}
+function copyCode(){
+  if(!roomId)return;
+  navigator.clipboard.writeText(roomId).then(()=>showToast('📋 '+roomId+' — код көшірілді!')).catch(()=>showToast(roomId));
+}
+function updateNavLeaveBtn(){
+  const existing=document.getElementById('leaveNavBtn');
+  if(roomId&&myId){
+    if(!existing){
+      const btn=document.createElement('button');
+      btn.id='leaveNavBtn';btn.className='btn btn-danger btn-sm';
+      btn.textContent='← Шығу';btn.onclick=showLeaveModal;
+      document.querySelector('.nav-right').prepend(btn);
+    }
+  }else{ if(existing)existing.remove(); }
+}
+
+// ── CREATE ──
+async function createRoom(){
+  const name=document.getElementById('nameInput').value.trim();
+  if(!name)return showToast('⚠️ Атыңызды жазыңыз');
+  myId=uid(); myName=name; isHost=true;
+  try{
+    const res = await api('/api/create',{playerId:myId,playerName:name,isPublic:roomType==='public'});
+    roomId=res.roomId;
+    saveSession(); setRoomPill(roomId);
+    document.getElementById('roomCode').textContent=roomId;
+    document.getElementById('hostControls').style.display='block';
+    document.getElementById('guestWaiting').style.display='none';
+    showScreen('screenLobby');
+    listenRoom();
+    updateNavLeaveBtn();
+  }catch(e){ showToast('❌ '+e.message); myId=null; }
+}
+
+// ── JOIN ──
+async function joinRoom(){
+  const name=document.getElementById('nameInput').value.trim();
+  const code=document.getElementById('roomInput').value.trim().toUpperCase();
+  if(!name)return showToast('⚠️ Атыңызды жазыңыз');
+  if(!code)return showToast('⚠️ Бөлме кодын жазыңыз');
+  myId=uid(); myName=name; isHost=false;
+  try{
+    await api('/api/join',{roomId:code,playerId:myId,playerName:name});
+    roomId=code;
+    saveSession(); setRoomPill(roomId);
+    document.getElementById('roomCode').textContent=roomId;
+    document.getElementById('hostControls').style.display='none';
+    document.getElementById('guestWaiting').style.display='block';
+    showScreen('screenLobby');
+    listenRoom();
+    updateNavLeaveBtn();
+  }catch(e){ showToast('❌ '+e.message); myId=null; }
+}
+
+// ── STATE HANDLER ──
+function handleStateUpdate(state){
+  if(!state)return;
+  saveSession();
+  isHost=state.host===myId;
+
+  // Check if we've been kicked — must happen before any early returns
+  if(roomId&&myId&&!state.players?.[myId]){
+    showToast('🚫 Сіз бөлмеден шығарылдыңыз',4000);
+    clearSession(); backToHome(); return;
+  }
+
+  if(state.phase==='lobby'){ renderLobby(state); return; }
+
+  if(state.phase==='role_reveal'){
+    if(!document.getElementById('screenRole').classList.contains('active')){
+      myRole=state.roles?.[myId];
+      showRoleScreen(myRole,state);
+    }
+    return;
+  }
+  if(state.phase==='mafia_win'||state.phase==='innocent_win'){
+    showWinScreen(state.phase,state); return;
+  }
+  showScreen('screenGame');
+  renderGame(state);
+}
+
+// ── LOBBY RENDER ──
+function renderLobby(state){
+  isHost=state.host===myId;
+  const players=Object.values(state.players||{});
+  document.getElementById('playerCount').textContent=`${players.length} ойыншы`;
+  const list=document.getElementById('lobbyList');
+  list.innerHTML=players.map(p=>`
+    <div class="player-row">
+      <div class="player-avatar" style="background:${avatarColor(p.id)};border-color:${p.online?avatarColor(p.id):'transparent'}">${initials(p.name)}</div>
+      <div class="player-name">${esc(p.name)}</div>
+      <div class="player-badges">
+        ${p.id===myId?'<span class="player-badge badge-you">Мен</span>':''}
+        ${p.id===state.host?'<span class="player-badge badge-host">Хост</span>':''}
+        ${p.ready?'<span class="player-badge badge-ready">Дайын</span>':''}
+      </div>
+      ${isHost&&p.id!==myId?`<button class="btn btn-danger btn-sm" onclick="promptKick('${p.id}','${esc(p.name)}')">👢</button>`:''}
+    </div>`).join('');
+  const startBtn=document.getElementById('startBtn');
+  if(startBtn)startBtn.disabled=players.length<4;
+  document.getElementById('hostControls').style.display=isHost?'block':'none';
+  document.getElementById('guestWaiting').style.display=isHost?'none':'block';
+  const vb=document.getElementById('roomVisibilityBadge');
+  if(vb){vb.textContent=state.public?'🌐 Ашық':'🔒 Жабық';vb.className=state.public?'pill pill-teal':'pill pill-muted';}
+}
+
+// ── KICK ──
+function promptKick(pid,pname){
+  kickTargetId=pid;
+  document.getElementById('kickModalText').textContent=`"${pname}" ойыншысын бөлмеден шығарасыз ба?`;
+  document.getElementById('kickModal').classList.remove('hidden');
+}
+function closeKickModal(){document.getElementById('kickModal').classList.add('hidden');kickTargetId=null;}
+async function confirmKick(){
+  if(!kickTargetId||!isHost)return;
+  try{ await api('/api/kick',{roomId,hostId:myId,targetId:kickTargetId}); }
+  catch(e){ showToast('❌ '+e.message); }
+  closeKickModal();
+}
+
+// ── START ──
+async function startGame(){
+  if(!isHost)return;
+  try{ await api('/api/start',{roomId,hostId:myId}); }
+  catch(e){ showToast('❌ '+e.message); }
+}
+
+// ── ROLE SCREEN ──
+function showRoleScreen(role,state){
+  myRole=role;
+  showScreen('screenRole');
+  actionDone=false; selectedTarget=null; detectiveResult=null;
+  const icons={mafia:'🔴',detective:'🔍',doctor:'💊',innocent:'⚪'};
+  const names={mafia:'Мафия',detective:'Детектив',doctor:'Дәрігер',innocent:'Бейкүнәп'};
+  const descs={
+    mafia:'Түнде құрбан таңдаңыз. Достарыңызбен бірге жұмыс жасаңыз.',
+    detective:'Түнде бір ойыншының рөлін тексеріңіз.',
+    doctor:'Түнде бір ойыншыны өлімнен сақтаңыз.',
+    innocent:'Күндіз мафияны тауып, дауыс беріп шығарыңыз.'
+  };
+  const teams={mafia:'Команда: Мафия',detective:'Команда: Бейкүнәптер',doctor:'Команда: Бейкүнәптер',innocent:'Команда: Бейкүнәптер'};
+  const cls={mafia:'role-mafia',detective:'role-detective',doctor:'role-doctor',innocent:'role-innocent'};
+  document.getElementById('myRoleIcon').textContent=icons[role]||'❓';
+  document.getElementById('myRoleName').textContent=names[role]||role;
+  document.getElementById('myRoleDesc').textContent=descs[role]||'';
+  document.getElementById('myRoleTeam').textContent=teams[role]||'';
+  document.getElementById('myRoleCard').className='role-card '+(cls[role]||'');
+  const mafiaReveal=document.getElementById('mafiaTeamReveal');
+  const mafiaList=document.getElementById('mafiaTeamList');
+  if(role==='mafia'&&state){
+    const teammates=Object.values(state.players||{}).filter(p=>state.roles?.[p.id]==='mafia'&&p.id!==myId);
+    if(teammates.length>0){
+      mafiaReveal.style.display='block';
+      mafiaList.innerHTML=teammates.map(p=>`
+        <div class="player-row">
+          <div class="player-avatar" style="background:${avatarColor(p.id)}">${initials(p.name)}</div>
+          <div class="player-name">${esc(p.name)}</div>
+          <span class="player-badge" style="background:#2a0814;color:var(--red2);border:1px solid var(--red)">🔴 Мафия</span>
+        </div>`).join('');
+    }else{mafiaReveal.style.display='none';}
+  }else{mafiaReveal.style.display='none';}
+  // Reset ready button
+  const btn=document.getElementById('readyBtn');
+  btn.disabled=false;
+  btn.textContent='✅ Дайынмын';
+}
+
+// ── READY ──
+async function readyUp(){
+  const btn=document.getElementById('readyBtn');
+  btn.disabled=true;
+  btn.textContent='⏳ Барлығы дайын болғанша күтіңіз...';
+  try{
+    await api('/api/ready',{roomId,playerId:myId});
+  }catch(e){
+    showToast('❌ '+e.message);
+    btn.disabled=false;
+    btn.textContent='✅ Дайынмын';
+  }
+}
+
+// ── TAB SWITCH ──
+function switchTab(tab){
+  activeTab=tab;
+  ['game','chat','log'].forEach(t=>{
+    document.getElementById(`tab${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.toggle('active',t===tab);
+    document.getElementById(`tab${t.charAt(0).toUpperCase()+t.slice(1)}Content`).style.display=t===tab?'block':'none';
+  });
+  if(tab==='chat'){unreadChat=0;document.getElementById('chatBadge').style.display='none';}
+}
+
+// ── GAME RENDER ──
+function renderGame(state){
+  const{phase,alive:aliveIds=[],players={},roles={},log:logArr=[],round=1}=state;
+  isHost=state.host===myId;
+  const pm={
+    mafia:{icon:'🌙',title:'Түн — Мафия кезегі',sub:'Мафия құрбанын таңдайды...',cls:'phase-night'},
+    detective:{icon:'🔍',title:'Түн — Детектив кезегі',sub:'Детектив тексеруде...',cls:'phase-night'},
+    doctor:{icon:'💊',title:'Түн — Дәрігер кезегі',sub:'Дәрігер емдеуде...',cls:'phase-night'},
+    day:{icon:'☀️',title:'Күн — Талқылау',sub:'Мафияны тауып шығарыңыз!',cls:'phase-day'},
+    vote:{icon:'🗳️',title:'Дауыс беру!',sub:'Ойыншыны таңдаңыз.',cls:'phase-vote'},
+    resolve:{icon:'⚖️',title:'Нәтиже...',sub:'',cls:'phase-night'},
+  }[phase]||{icon:'❓',title:phase,sub:'',cls:'phase-night'};
+  const banner=document.getElementById('phaseBanner');
+  banner.className='phase-banner '+pm.cls;
+  document.getElementById('phaseTitle').textContent=pm.icon+' '+pm.title;
+  document.getElementById('phaseSub').textContent=pm.sub;
+  document.getElementById('phaseRound').textContent=round+'-раунд';
+  if(state.phaseStart&&lastPhase!==phase){lastPhase=phase;actionDone=false;selectedTarget=null;startTimer(60,state.phaseStart);}
+  const mafiaCount=(aliveIds||[]).filter(p=>roles[p]==='mafia').length;
+  const othersCount=(aliveIds||[]).length-mafiaCount;
+  document.getElementById('statusPills').innerHTML=`
+    <span class="pill pill-red">🔴 Мафия: ${mafiaCount}</span>
+    <span class="pill pill-teal">⚪ Басқалар: ${othersCount}</span>
+    <span class="pill pill-muted">👥 Жалпы: ${(aliveIds||[]).length}</span>
+    <span class="pill pill-gold">🔢 Раунд ${round}</span>`;
+  const aliveList=document.getElementById('aliveList');
+  aliveList.innerHTML=(aliveIds||[]).map(pid=>{
+    const p=players[pid]||{name:pid};
+    return `<div class="player-row">
+      <div class="player-avatar" style="background:${avatarColor(pid)}">${initials(p.name)}</div>
+      <div class="player-name">${esc(p.name)}${pid===myId?' <span style="color:var(--muted);font-size:.75rem">(мен)</span>':''}</div>
+      <div class="player-badges">${pid===state.host?'<span class="player-badge badge-host">Хост</span>':''}</div>
+    </div>`;
+  }).join('');
+  renderActionCard(state);
+  renderLog(logArr);
+}
+
+function renderActionCard(state){
+  const{phase,alive:aliveIds=[],players={},roles={}}=state;
+  const ac=document.getElementById('actionCard');
+  const at=document.getElementById('actionTitle');
+  const ab=document.getElementById('actionBody');
+  const dc=document.getElementById('detectResultCard');
+  dc.style.display='none';
+  const amAlive=(aliveIds||[]).includes(myId);
+  if(!amAlive){
+    ac.style.display='block';at.textContent='👁️ Спектатор';
+    ab.innerHTML='<div class="spectator-msg">Сіз өлдіңіз. Ойынды бақылауда...</div>';return;
+  }
+  if(phase==='mafia'&&myRole==='mafia'){
+    if(actionDone){ac.style.display='none';return;}
+    ac.style.display='block';at.textContent='🔴 Өлтіру мақсатын таңдаңыз';
+    const targets=(aliveIds||[]).filter(pid=>roles[pid]!=='mafia');
+    ab.innerHTML=makeTargetList(targets,players,'🗡️ Өлтіру','kill');return;
+  }
+  if(phase==='detective'&&myRole==='detective'){
+    ac.style.display='block';
+    if(actionDone&&detectiveResult){
+      ac.style.display='none';dc.style.display='block';
+      const r=detectiveResult,isMafia=r.role==='mafia';
+      document.getElementById('detectIcon').textContent=isMafia?'🚨':'✅';
+      document.getElementById('detectVerdict').textContent=isMafia?'🔴 МАФИЯ!':getRoleLabel(r.role);
+      document.getElementById('detectText').textContent=`${r.name}: ${getRoleName(r.role)}`;
+      document.getElementById('detectResultInner').style.borderColor=isMafia?'var(--red)':'var(--teal)';
+      return;
+    }
+    at.textContent='🔍 Тексеретін адамды таңдаңыз';
+    const targets=(aliveIds||[]).filter(pid=>pid!==myId);
+    ab.innerHTML=makeTargetList(targets,players,'🔎 Тексеру','detect');return;
+  }
+  if(phase==='doctor'&&myRole==='doctor'){
+    if(actionDone){ac.style.display='none';return;}
+    ac.style.display='block';at.textContent='💊 Кімді емдейсіз?';
+    ab.innerHTML=makeTargetList(aliveIds,players,'💉 Емдеу','heal');return;
+  }
+  if(phase==='vote'||phase==='day'){
+    ac.style.display='block';
+    if(actionDone){
+      at.textContent='🗳️ Дауыс беру';
+      ab.innerHTML='<div class="voted-notice">✅ Дауысыңыз қабылданды. Басқалар күтілуде...' +
+        (isHost ? '<br><button class="btn btn-danger btn-sm" style="margin-top:.6rem" onclick="skipVote()">⏭️ Дауысты аяқтату</button>' : '') +
+        '</div>';return;
+    }
+    at.textContent='🗳️ Дауыс беріңіз — кімді шығарамыз?';
+    const targets=(aliveIds||[]).filter(pid=>pid!==myId);
+    const skipBtn=isHost?'<div style="margin-top:.6rem;text-align:center"><button class="btn btn-ghost btn-sm" onclick="skipVote()">⏭️ Дауысты аяқтату</button></div>':'';
+    ab.innerHTML=makeTargetList(targets,players,'🗳️ Дауыс беру','vote')+skipBtn;return;
+  }
+  ac.style.display='none';
+}
+
+function makeTargetList(targets,players,btnLabel,type){
+  return`<div class="target-list">${targets.map((pid,i)=>{
+    const p=players[pid]||{name:pid};
+    const sel=selectedTarget===pid;
+    return`<div class="target-item${sel?' selected':''}" onclick="selectTarget('${pid}','${type}',this)">
+      <span class="target-num">${i+1}</span>
+      <div class="player-avatar" style="background:${avatarColor(pid)};width:28px;height:28px;font-size:.62rem;flex-shrink:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center">${initials(p.name)}</div>
+      <span class="target-name">${esc(p.name)}</span>
+      ${sel?'<span class="target-check">✓</span>':''}
+    </div>`;
+  }).join('')}</div>
+  <div class="action-confirm">
+    <button class="btn btn-primary" id="confirmBtn" onclick="confirmAction('${type}')" ${selectedTarget?'':'disabled'}>${btnLabel}</button>
+  </div>`;
+}
+
+function selectTarget(pid,type,el){
+  selectedTarget=pid;
+  document.querySelectorAll('.target-item').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  el.querySelector('.target-check')||el.insertAdjacentHTML('beforeend','<span class="target-check">✓</span>');
+  const btn=document.getElementById('confirmBtn');
+  if(btn)btn.disabled=false;
+}
+
+async function confirmAction(type){
+  if(!selectedTarget)return;
+  actionDone=true;
+  try{
+    if(type==='kill'){
+      await api('/api/action/kill',{roomId,actorId:myId,targetId:selectedTarget});
+      showToast('🗡️ Таңдау жіберілді');
+    }else if(type==='detect'){
+      const res=await api('/api/action/detect',{roomId,actorId:myId,targetId:selectedTarget});
+      detectiveResult={name:res.targetName,role:res.targetRole};
+      renderActionCard({phase:'detective',alive:[myId],players:{[myId]:{name:myName}},roles:{}});
+    }else if(type==='heal'){
+      await api('/api/action/heal',{roomId,actorId:myId,targetId:selectedTarget});
+      showToast('💊 Емдеу жіберілді');
+    }else if(type==='vote'){
+      await api('/api/action/vote',{roomId,actorId:myId,targetId:selectedTarget});
+      showToast('✅ Дауысыңыз қабылданды');
+    }
+  }catch(e){
+    actionDone=false;
+    showToast('❌ '+e.message);
+  }
+  selectedTarget=null;
+}
+
+// ── SKIP VOTE ──
+async function skipVote(){
+  if(!isHost||!roomId)return;
+  try{
+    await api('/api/action/skip_vote',{roomId,hostId:myId});
+    showToast('⏭️ Дауыс аяқталды');
+  }catch(e){
+    showToast('❌ '+e.message);
+  }
+}
+
+// ── CHAT ──
+async function sendChat(context){
+  const inputId=context==='lobby'?'lobbyChatInput':'gameChatInput';
+  const inp=document.getElementById(inputId);
+  const text=inp.value.trim();
+  if(!text||!roomId||!myId)return;
+  const saved=inp.value;
+  inp.value='';
+  inp.disabled=true;
+  try{
+    await api('/api/chat',{roomId,senderId:myId,senderName:myName,text});
+  }catch(e){
+    inp.value=saved;
+    showToast('❌ Хабар жіберілмеді');
+  }finally{
+    inp.disabled=false;
+    inp.focus();
+  }
+}
+
+function renderChat(msgs,containerId){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  const wasBottom=el.scrollHeight-el.scrollTop-el.clientHeight<40;
+  el.innerHTML=msgs.map(m=>{
+    if(m.type==='system'){
+      return`<div class="chat-msg system"><div class="chat-bubble">${esc(m.text)}</div></div>`;
+    }
+    const mine=m.senderId===myId;
+    return`<div class="chat-msg${mine?' mine':''}">
+      <div class="chat-avatar" style="background:${avatarColor(m.senderId)}">${initials(m.senderName)}</div>
+      <div class="chat-bubble">
+        ${!mine?`<div class="chat-sender">${esc(m.senderName)}</div>`:''}
+        ${esc(m.text)}
+      </div>
+    </div>`;
+  }).join('');
+  if(wasBottom||msgs.length<=3)el.scrollTop=el.scrollHeight;
+}
+
+// ── LOG ──
+function renderLog(logArr){
+  const el=document.getElementById('gameLog');
+  if(!logArr||!logArr.length){el.innerHTML='<div class="log-entry">Журнал бос...</div>';return;}
+  const entries=Array.isArray(logArr)?logArr:Object.values(logArr);
+  el.innerHTML=entries.slice().reverse().map(e=>{
+    const cls=e.startsWith('💀')||e.startsWith('⚖️')?'danger':e.startsWith('✨')||e.startsWith('🎉')?'success':e.startsWith('☀️')||e.startsWith('🌙')||e.startsWith('🎭')?'important':'';
+    return`<div class="log-entry ${cls}">${esc(e)}</div>`;
+  }).join('');
+}
+
+// ── WIN ──
+function showWinScreen(phase,state){
+  clearSession();
+  showScreen('screenWin');
+  const innocent=phase==='innocent_win';
+  document.getElementById('winIcon').textContent=innocent?'🏆':'💀';
+  document.getElementById('winTitle').textContent=innocent?'Бейкүнәптер жеңді!':'Мафия жеңді!';
+  document.getElementById('winSub').textContent=innocent?'Мафия жойылды. Қала аман қалды!':'Мафия қаланы басып алды...';
+  const players=Object.values(state.players||{});
+  const roles=state.roles||{};
+  const rc=document.getElementById('rolesRevealCard');
+  rc.innerHTML=`<div class="card-title">📋 Барлық рөлдер</div><div class="players-list">${
+    players.map(p=>`<div class="player-row">
+      <div class="player-avatar" style="background:${avatarColor(p.id)}">${initials(p.name)}</div>
+      <div class="player-name">${esc(p.name)}${p.id===myId?' (мен)':''}</div>
+      <span class="player-badge badge-ready">${getRoleLabel(roles[p.id])}</span>
+    </div>`).join('')
+  }</div>`;
+  updateNavLeaveBtn();
+}
+
+// ── BACK HOME ──
+function backToHome(){
+  if(sseSource){sseSource.close();sseSource=null;}
+  myId=null;myName='';roomId=null;isHost=false;myRole=null;
+  selectedTarget=null;actionDone=false;lastPhase=null;detectiveResult=null;
+  unreadChat=0;activeTab='game';window._lastChatCount=0;
+  clearSession();setRoomPill(null);
+  document.getElementById('nameInput').value='';
+  document.getElementById('roomInput').value='';
+  document.getElementById('restoreBanner').style.display='none';
+  updateNavLeaveBtn();
+  showScreen('screenHome');
+  loadPublicRooms();
+}
+
+// ── TIMER ──
+function startTimer(total,startTs){
+  if(timerInterval)clearInterval(timerInterval);
+  const fill=document.getElementById('timerFill');
+  const tick=()=>{
+    const el=Math.floor((Date.now()-startTs)/1000);
+    const left=Math.max(0,total-el);
+    fill.style.width=(left/total*100)+'%';
+    fill.style.background=left<15?'var(--red)':left<30?'var(--gold)':'var(--teal)';
+    if(left<=0)clearInterval(timerInterval);
+  };
+  tick();timerInterval=setInterval(tick,1000);
+}
+
+</script>
+</body>
+</html>
