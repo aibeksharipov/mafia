@@ -314,18 +314,27 @@ input[type=text]::placeholder{color:var(--muted2)}
 
   <!-- ROLE REVEAL -->
   <div class="screen" id="screenRole">
-    <p style="text-align:center;color:var(--muted);margin-bottom:1.25rem;font-size:.88rem">Сіздің рөліңіз:</p>
-    <div class="role-card" id="myRoleCard">
-      <span class="role-icon" id="myRoleIcon">❓</span>
-      <div class="role-name" id="myRoleName">...</div>
-      <div class="role-desc" id="myRoleDesc">...</div>
-      <div class="role-team" id="myRoleTeam"></div>
+    <div style="min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem">
+      <p style="text-align:center;color:var(--muted);font-size:.88rem;margin:0">🎭 Сіздің рөліңіз — ешкімге айтпаңыз!</p>
+      <div class="role-card" id="myRoleCard" style="width:100%;margin:0">
+        <span class="role-icon" id="myRoleIcon"></span>
+        <div class="role-name" id="myRoleName"></div>
+        <div class="role-desc" id="myRoleDesc"></div>
+        <div class="role-team" id="myRoleTeam"></div>
+      </div>
+      <div id="mafiaTeamReveal" style="display:none;width:100%" class="mafia-team-box">
+        <div class="mafia-team-title">🔴 МАФИЯ КОМАНДАСЫ</div>
+        <div id="mafiaTeamList" class="players-list"></div>
+      </div>
+      <div style="width:100%;background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:1.1rem 1.25rem;text-align:center">
+        <div style="font-size:.82rem;color:var(--muted);margin-bottom:.4rem">Ойын автоматты басталады</div>
+        <div style="font-family:'Unbounded',sans-serif;font-size:2.8rem;color:var(--gold);line-height:1" id="roleCountdownNum">—</div>
+        <div style="margin-top:.65rem;height:4px;background:var(--card2);border-radius:2px;overflow:hidden">
+          <div id="roleCountdownBar" style="height:100%;width:100%;background:var(--teal);border-radius:2px;transition:width 1s linear,background .5s"></div>
+        </div>
+        <div style="font-size:.76rem;color:var(--muted2);margin-top:.45rem">Рөліңізді жаттап алыңыз!</div>
+      </div>
     </div>
-    <div id="mafiaTeamReveal" style="display:none" class="mafia-team-box">
-      <div class="mafia-team-title">🔴 МАФИЯ КОМАНДАСЫ</div>
-      <div id="mafiaTeamList" class="players-list"></div>
-    </div>
-    <button class="btn btn-primary btn-full" style="padding:.9rem;font-size:1rem;margin-top:.75rem" onclick="readyUp()" id="readyBtn">✅ Дайынмын</button>
   </div>
 
   <!-- GAME -->
@@ -469,6 +478,7 @@ const getRoleName=r=>({mafia:'Мафия',detective:'Детектив',doctor:'�
 const showScreen=id=>{
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'instant'});
 };
 let toastTimer;
 const showToast=(msg,dur=2500)=>{
@@ -775,24 +785,28 @@ function showRoleScreen(role,state){
         </div>`).join('');
     }else{mafiaReveal.style.display='none';}
   }else{mafiaReveal.style.display='none';}
-  // Reset ready button
-  const btn=document.getElementById('readyBtn');
-  btn.disabled=false;
-  btn.textContent='✅ Дайынмын';
+  startRoleCountdown();
 }
 
-// ── READY ──
-async function readyUp(){
-  const btn=document.getElementById('readyBtn');
-  btn.disabled=true;
-  btn.textContent='⏳ Барлығы дайын болғанша күтіңіз...';
-  try{
-    await api('/api/ready',{roomId,playerId:myId});
-  }catch(e){
-    showToast('❌ '+e.message);
-    btn.disabled=false;
-    btn.textContent='✅ Дайынмын';
-  }
+// ── ROLE COUNTDOWN (visual only — server auto-advances after 10s) ──
+let _roleCountdownTimer=null;
+function startRoleCountdown(){
+  if(_roleCountdownTimer)clearInterval(_roleCountdownTimer);
+  let left=10;
+  const numEl=document.getElementById('roleCountdownNum');
+  const barEl=document.getElementById('roleCountdownBar');
+  if(numEl)numEl.textContent=left;
+  if(barEl){barEl.style.width='100%';barEl.style.background='var(--teal)';}
+  _roleCountdownTimer=setInterval(()=>{
+    left--;
+    if(numEl)numEl.textContent=Math.max(0,left);
+    const pct=(Math.max(0,left)/10*100)+'%';
+    if(barEl){
+      barEl.style.width=pct;
+      barEl.style.background=left<=3?'var(--red)':left<=6?'var(--gold)':'var(--teal)';
+    }
+    if(left<=0){clearInterval(_roleCountdownTimer);_roleCountdownTimer=null;if(numEl)numEl.textContent='🚀';}
+  },1000);
 }
 
 // ── TAB SWITCH ──
@@ -822,7 +836,7 @@ function renderGame(state){
   document.getElementById('phaseTitle').textContent=pm.icon+' '+pm.title;
   document.getElementById('phaseSub').textContent=pm.sub;
   document.getElementById('phaseRound').textContent=round+'-раунд';
-  if(state.phaseStart&&lastPhase!==phase){lastPhase=phase;actionDone=false;selectedTarget=null;startTimer(60,state.phaseStart);}
+  if(state.phaseStart&&lastPhase!==phase){lastPhase=phase;actionDone=false;selectedTarget=null;if(phase==='mafia')detectiveResult=null;startTimer(60,state.phaseStart);}
   const mafiaCount=(aliveIds||[]).filter(p=>roles[p]==='mafia').length;
   const othersCount=(aliveIds||[]).length-mafiaCount;
   document.getElementById('statusPills').innerHTML=`
@@ -849,6 +863,12 @@ function renderActionCard(state){
   const at=document.getElementById('actionTitle');
   const ab=document.getElementById('actionBody');
   const dc=document.getElementById('detectResultCard');
+  // If detective already got their result, keep showing it regardless of phase change
+  if(detectiveResult&&actionDone&&myRole==='detective'){
+    ac.style.display='none';
+    dc.style.display='block';
+    return;
+  }
   dc.style.display='none';
   const amAlive=(aliveIds||[]).includes(myId);
   if(!amAlive){
@@ -932,7 +952,16 @@ async function confirmAction(type){
     }else if(type==='detect'){
       const res=await api('/api/action/detect',{roomId,actorId:myId,targetId:selectedTarget});
       detectiveResult={name:res.targetName,role:res.targetRole};
-      renderActionCard({phase:'detective',alive:[myId],players:{[myId]:{name:myName}},roles:{}});
+      // Show result immediately in DOM — don't wait for state update which may overwrite it
+      const isMafia=res.targetRole==='mafia';
+      document.getElementById('actionCard').style.display='none';
+      const dc=document.getElementById('detectResultCard');
+      dc.style.display='block';
+      document.getElementById('detectIcon').textContent=isMafia?'🚨':'✅';
+      document.getElementById('detectVerdict').textContent=isMafia?'🔴 МАФИЯ!':getRoleLabel(res.targetRole);
+      document.getElementById('detectText').textContent=`${res.targetName}: ${getRoleName(res.targetRole)}`;
+      document.getElementById('detectResultInner').style.borderColor=isMafia?'var(--red)':'var(--teal)';
+      showToast(isMafia?'🚨 Мафия табылды!':'✅ Бейкүнәп');
     }else if(type==='heal'){
       await api('/api/action/heal',{roomId,actorId:myId,targetId:selectedTarget});
       showToast('💊 Емдеу жіберілді');
@@ -1032,6 +1061,7 @@ function showWinScreen(phase,state){
 
 // ── BACK HOME ──
 function backToHome(){
+  if(_roleCountdownTimer){clearInterval(_roleCountdownTimer);_roleCountdownTimer=null;}
   if(sseSource){sseSource.close();sseSource=null;}
   myId=null;myName='';roomId=null;isHost=false;myRole=null;
   selectedTarget=null;actionDone=false;lastPhase=null;detectiveResult=null;
